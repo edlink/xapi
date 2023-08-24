@@ -1,4 +1,4 @@
-import axios, {
+import Axios, {
   AxiosRequestConfig,
   AxiosPromise,
   AxiosStatic,
@@ -146,8 +146,10 @@ class XAPI {
 
   protected endpoint: string;
   private headers: { [key: string]: string };
+  
+  private axios: AxiosStatic;
 
-  public constructor(params: XAPIConfig) {
+  public constructor(params: XAPIConfig, axios?: AxiosStatic) {
     const version: Versions = params.version || "1.0.3";
     this.endpoint = formatEndpoint(params.endpoint);
     this.headers = {
@@ -156,10 +158,15 @@ class XAPI {
       // No Authorization Process and Requirements - https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md#no-authorization-process-and-requirements
       Authorization: params.auth ? params.auth : toBasicAuth("", ""),
     };
+    this.axios = axios || Axios;
   }
 
   public getAxios(): AxiosStatic {
-    return axios;
+    return this.axios;
+  }
+
+   public setAxios(axios: AxiosStatic): void {
+    this.axios = axios;
   }
 
   protected requestResource(params: {
@@ -180,7 +187,7 @@ class XAPI {
     url: string,
     requestConfig?: AxiosRequestConfig | undefined
   ): AxiosPromise<any> {
-    return axios
+    return this.axios
       .request({
         method: requestConfig?.method || "GET",
         url: url,
